@@ -15,6 +15,8 @@
 #include <list>
 #include <mutex>  // NOLINT
 #include <vector>
+#include <unordered_map>
+#include <mutex>
 
 #include "buffer/replacer.h"
 #include "common/config.h"
@@ -46,6 +48,13 @@ class ClockReplacer : public Replacer {
   size_t Size() override;
 
  private:
+ std::unordered_map<frame_id_t, bool> hash;
+ std::vector<frame_id_t> lst;
+ size_t ref=0;
+ size_t num_page=0;
+ frame_id_t temp;
+ std::mutex mtx;
+
   // TODO(student): implement me!
 };
 

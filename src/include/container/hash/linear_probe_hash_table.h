@@ -97,6 +97,7 @@ class LinearProbeHashTable : public HashTable<KeyType, ValueType, KeyComparator>
 
   // Hash function
   HashFunction<KeyType> hash_fn_;
+  size_t num_buckets_;
 };
 
 }  // namespace bustub

@@ -54,14 +54,41 @@ class SimpleCatalog {
    */
   TableMetadata *CreateTable(Transaction *txn, const std::string &table_name, const Schema &schema) {
     BUSTUB_ASSERT(names_.count(table_name) == 0, "Table names should be unique!");
-    return nullptr;
+    if(names_.count(table_name) > 0){
+      return nullptr;
+    }
+    names_[table_name] = next_table_oid_;
+    page_id_t myPage;
+    bpm_->NewPage(&myPage, nullptr);
+
+    std::unique_ptr<TableHeap> myPtr(new TableHeap(bpm_, lock_manager_, log_manager_, myPage));
+    std::unique_ptr<TableMetadata> myMetaData(new TableMetadata(schema, table_name, move(myPtr), next_table_oid_));
+    tables_[next_table_oid_] = move(myMetaData);
+    next_table_oid_++;
+
+    return myMetaData.get();
+
   }
 
   /** @return table metadata by name */
-  TableMetadata *GetTable(const std::string &table_name) { return nullptr; }
+  TableMetadata *GetTable(const std::string &table_name) { 
+    if(names_.find(table_name) == names_.end()){
+      throw std::out_of_range("You're past the end");
+      return nullptr;
+    }
+    auto table_oid = names_[table_name];
+    return tables_[table_oid].get();
+    
+    }
 
   /** @return table metadata by oid */
-  TableMetadata *GetTable(table_oid_t table_oid) { return nullptr; }
+  TableMetadata *GetTable(table_oid_t table_oid) { 
+    if(tables_.find(table_oid) == tables_.end()){
+      throw std::out_of_range("You're past the end");
+      return nullptr; 
+    }
+    return tables_[table_oid].get();
+    }
 
  private:
   [[maybe_unused]] BufferPoolManager *bpm_;
